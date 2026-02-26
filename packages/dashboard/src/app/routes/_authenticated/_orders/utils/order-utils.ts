@@ -100,6 +100,7 @@ export function computePendingOrder(
     input: ModifyOrderInput,
     addedVariants: Map<string, ProductVariantInfo>,
     eligibleShippingMethods?: Array<{ id: string; name: string; priceWithTax: number }>,
+    orderLineCustomFieldNames?: string[],
 ): Order {
     // Adjust lines
     const lines = order.lines.map(line => {
@@ -109,12 +110,10 @@ export function computePendingOrder(
         return adjust ? { ...line, quantity: adjust.quantity, customFields: adjustCf ?? lineCf } : line;
     });
 
-    // Derive custom fields template from existing lines so newly added lines
-    // show the edit button when OrderLine custom fields are configured.
-    const existingCf = (order.lines[0] as WithCustomFields<Order['lines'][number]>)?.customFields;
-    const customFieldsTemplate = existingCf
-        ? Object.fromEntries(Object.keys(existingCf).map(k => [k, null]))
-        : undefined;
+    const customFieldsTemplate =
+        orderLineCustomFieldNames && orderLineCustomFieldNames.length > 0
+            ? Object.fromEntries(orderLineCustomFieldNames.map(k => [k, null]))
+            : undefined;
 
     // Add new items (as AddedLine)
     const addedLines = input.addItems
