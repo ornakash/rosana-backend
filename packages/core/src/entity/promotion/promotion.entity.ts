@@ -203,7 +203,7 @@ export class Promotion
         if (this.startsAt && this.startsAt > new Date()) {
             return false;
         }
-        if (this.couponCode && !order.couponCodes.includes(this.couponCode)) {
+        if (this.couponCode && !order.couponCodes.some(code => code.toLowerCase() === this.couponCode.toLowerCase())) {
             return false;
         }
         const promotionState: PromotionState = {};

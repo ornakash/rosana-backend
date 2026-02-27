@@ -185,15 +185,12 @@ describe('Promotions applied to Orders', () => {
             expect(applyCouponCode.errorCode).toBe(ErrorCode.COUPON_CODE_EXPIRED_ERROR);
         });
 
-        it('coupon code application is case-sensitive', async () => {
+        it('coupon code application is case-insensitive', async () => {
             const { applyCouponCode } = await shopClient.query(applyCouponCodeDocument, {
                 couponCode: TEST_COUPON_CODE.toLowerCase(),
             });
-            orderResultGuard.assertErrorResult(applyCouponCode);
-            expect(applyCouponCode.message).toBe(
-                `Coupon code "${TEST_COUPON_CODE.toLowerCase()}" is not valid`,
-            );
-            expect(applyCouponCode.errorCode).toBe(ErrorCode.COUPON_CODE_INVALID_ERROR);
+            orderResultGuard.assertSuccess(applyCouponCode);
+            expect(applyCouponCode.couponCodes).toContain(TEST_COUPON_CODE.toLowerCase());
         });
 
         it('applies a valid coupon code', async () => {

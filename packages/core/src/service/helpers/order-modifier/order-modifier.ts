@@ -583,7 +583,7 @@ export class OrderModifier {
                         | CouponCodeInvalidError
                         | CouponCodeLimitError;
                 }
-                if (!order.couponCodes.includes(couponCode)) {
+                if (!order.couponCodes.some(cc => cc.toLowerCase() === couponCode.toLowerCase())) {
                     // This is a new coupon code that hadn't been applied before
                     await this.historyService.createHistoryEntryForOrder({
                         ctx,
@@ -594,7 +594,7 @@ export class OrderModifier {
                 }
             }
             for (const existingCouponCode of order.couponCodes) {
-                if (!input.couponCodes.includes(existingCouponCode)) {
+                if (!input.couponCodes.some(cc => cc.toLowerCase() === existingCouponCode.toLowerCase())) {
                     // An existing coupon code has been removed
                     await this.historyService.createHistoryEntryForOrder({
                         ctx,

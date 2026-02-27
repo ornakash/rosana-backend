@@ -998,7 +998,7 @@ export class OrderService {
         couponCode: string,
     ): Promise<ErrorResultUnion<ApplyCouponCodeResult, Order>> {
         const order = await this.getOrderOrThrow(ctx, orderId);
-        if (order.couponCodes.includes(couponCode)) {
+        if (order.couponCodes.some(cc => cc.toLowerCase() === couponCode.toLowerCase())) {
             return order;
         }
         const validationResult = await this.promotionService.validateCouponCode(
@@ -1026,8 +1026,8 @@ export class OrderService {
      */
     async removeCouponCode(ctx: RequestContext, orderId: ID, couponCode: string) {
         const order = await this.getOrderOrThrow(ctx, orderId);
-        if (order.couponCodes.includes(couponCode)) {
-            order.couponCodes = order.couponCodes.filter(cc => cc !== couponCode);
+        if (order.couponCodes.some(cc => cc.toLowerCase() === couponCode.toLowerCase())) {
+            order.couponCodes = order.couponCodes.filter(cc => cc.toLowerCase() !== couponCode.toLowerCase());
             await this.historyService.createHistoryEntryForOrder({
                 ctx,
                 orderId: order.id,

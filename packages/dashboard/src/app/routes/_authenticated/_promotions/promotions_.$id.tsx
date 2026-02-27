@@ -204,7 +204,12 @@ function PromotionDetailPage() {
                             control={form.control}
                             name="couponCode"
                             label={<Trans>Coupon code</Trans>}
-                            render={({ field }) => <Input {...field} />}
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    onChange={e => field.onChange(e.target.value.toUpperCase())}
+                                />
+                            )}
                         />
                         <FormFieldWrapper
                             control={form.control}

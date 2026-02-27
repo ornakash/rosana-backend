@@ -15,7 +15,7 @@ import {
 } from '@vendure/common/lib/generated-types';
 import { ID, PaginatedList } from '@vendure/common/lib/shared-types';
 import { unique } from '@vendure/common/lib/unique';
-import { In, IsNull } from 'typeorm';
+import { In, IsNull, Raw } from 'typeorm';
 
 import { RequestContext } from '../../api/common/request-context';
 import { RelationPaths } from '../../api/decorators/relations.decorator';
@@ -248,7 +248,7 @@ export class PromotionService {
     ): Promise<JustErrorResults<ApplyCouponCodeResult> | Promotion> {
         const promotion = await this.connection.getRepository(ctx, Promotion).findOne({
             where: {
-                couponCode,
+                couponCode: Raw(alias => `LOWER(${alias}) = LOWER(:couponCode)`, { couponCode }),
                 enabled: true,
                 deletedAt: IsNull(),
                 channels: { id: ctx.channelId },
@@ -257,7 +257,7 @@ export class PromotionService {
         });
         if (
             !promotion ||
-            promotion.couponCode !== couponCode ||
+            promotion.couponCode.toLowerCase() !== couponCode.toLowerCase() ||
             !promotion.channels.find(c => idsAreEqual(c.id, ctx.channelId))
         ) {
             return new CouponCodeInvalidError({ couponCode });
