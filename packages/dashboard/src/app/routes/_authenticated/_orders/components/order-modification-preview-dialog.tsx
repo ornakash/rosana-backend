@@ -58,7 +58,11 @@ export function OrderModificationPreviewDialog({
     // Use a ref to track the last input sent to avoid duplicate calls
     const lastInputRef = useRef<ModifyOrderInput | null>(null);
     const previewMutation = useMutation({
-        mutationFn: api.mutate(addCustomFields(modifyOrderDocument)),
+        mutationFn: api.mutate(
+            addCustomFields(modifyOrderDocument, {
+                includeNestedFragments: ['OrderLine', 'Fulfillment'],
+            }),
+        ),
     });
 
     // Create form with dynamic fields for each payment
@@ -77,7 +81,12 @@ export function OrderModificationPreviewDialog({
     });
 
     const confirmMutation = useMutation({
-        mutationFn: (input: ModifyOrderInput) => api.mutate(addCustomFields(modifyOrderDocument))({ input }),
+        mutationFn: (input: ModifyOrderInput) =>
+            api.mutate(
+                addCustomFields(modifyOrderDocument, {
+                    includeNestedFragments: ['OrderLine', 'Fulfillment'],
+                }),
+            )({ input }),
     });
 
     // Trigger preview when dialog opens or input changes (while open)
