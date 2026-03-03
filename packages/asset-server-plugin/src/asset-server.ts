@@ -307,6 +307,8 @@ export class AssetServer {
                 return 'image/tiff';
             case '.webp':
                 return 'image/webp';
+            case '.pdf':
+                return 'application/pdf';
         }
     }
 }

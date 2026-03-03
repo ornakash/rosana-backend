@@ -279,7 +279,7 @@ describe('AssetServerPlugin', () => {
         }
 
         beforeAll(async () => {
-            const formats = ['gif', 'jpg', 'png', 'svg', 'tiff', 'webp'];
+            const formats = ['gif', 'jpg', 'png', 'svg', 'tiff', 'webp', 'pdf'];
 
             const filesToUpload = formats.map(ext => path.join(__dirname, `fixtures/assets/test.${ext}`));
             const { createAssets }: CreateAssetsMutation = await adminClient.fileUploadMutation({
@@ -315,6 +315,10 @@ describe('AssetServerPlugin', () => {
 
         it('webp', async () => {
             await testMimeTypeOfAssetWithExt('webp', 'image/webp');
+        });
+
+        it('pdf', async () => {
+            await testMimeTypeOfAssetWithExt('pdf', 'application/pdf');
         });
     });
 
