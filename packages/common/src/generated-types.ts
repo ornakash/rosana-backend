@@ -360,6 +360,11 @@ export type AssignPaymentMethodsToChannelInput = {
   paymentMethodIds: Array<Scalars['ID']['input']>;
 };
 
+export type AssignProductOptionGroupsToChannelInput = {
+  channelId: Scalars['ID']['input'];
+  productOptionGroupIds: Array<Scalars['ID']['input']>;
+};
+
 export type AssignProductVariantsToChannelInput = {
   channelId: Scalars['ID']['input'];
   priceFactor?: InputMaybe<Scalars['Float']['input']>;
@@ -1003,7 +1008,7 @@ export type CreateProductInput = {
 export type CreateProductOptionGroupInput = {
   code: Scalars['String']['input'];
   customFields?: InputMaybe<Scalars['JSON']['input']>;
-  options: Array<CreateGroupOptionInput>;
+  options?: InputMaybe<Array<CreateGroupOptionInput>>;
   translations: Array<ProductOptionGroupTranslationInput>;
 };
 
@@ -1828,6 +1833,7 @@ export enum ErrorCode {
   PAYMENT_METHOD_MISSING_ERROR = 'PAYMENT_METHOD_MISSING_ERROR',
   PAYMENT_ORDER_MISMATCH_ERROR = 'PAYMENT_ORDER_MISMATCH_ERROR',
   PAYMENT_STATE_TRANSITION_ERROR = 'PAYMENT_STATE_TRANSITION_ERROR',
+  PRODUCT_OPTION_GROUP_IN_USE_ERROR = 'PRODUCT_OPTION_GROUP_IN_USE_ERROR',
   PRODUCT_OPTION_IN_USE_ERROR = 'PRODUCT_OPTION_IN_USE_ERROR',
   QUANTITY_TOO_GREAT_ERROR = 'QUANTITY_TOO_GREAT_ERROR',
   REFUND_AMOUNT_ERROR = 'REFUND_AMOUNT_ERROR',
@@ -2906,6 +2912,8 @@ export type Mutation = {
   assignFacetsToChannel: Array<Facet>;
   /** Assigns PaymentMethods to the specified Channel */
   assignPaymentMethodsToChannel: Array<PaymentMethod>;
+  /** Assigns ProductOptionGroups to the specified Channel */
+  assignProductOptionGroupsToChannel: Array<ProductOptionGroup>;
   /** Assigns ProductVariants to the specified Channel */
   assignProductVariantsToChannel: Array<ProductVariant>;
   /** Assigns all ProductVariants of Product to the specified Channel */
@@ -3031,6 +3039,10 @@ export type Mutation = {
   deleteProduct: DeletionResponse;
   /** Delete a ProductOption */
   deleteProductOption: DeletionResponse;
+  /** Delete a ProductOptionGroup */
+  deleteProductOptionGroup: DeletionResponse;
+  /** Delete multiple ProductOptionGroups */
+  deleteProductOptionGroups: Array<DeletionResponse>;
   /** Delete a ProductVariant */
   deleteProductVariant: DeletionResponse;
   /** Delete multiple ProductVariants */
@@ -3114,6 +3126,8 @@ export type Mutation = {
   removeOptionGroupFromProduct: RemoveOptionGroupFromProductResult;
   /** Removes PaymentMethods from the specified Channel */
   removePaymentMethodsFromChannel: Array<PaymentMethod>;
+  /** Removes ProductOptionGroups from the specified Channel */
+  removeProductOptionGroupsFromChannel: Array<RemoveProductOptionGroupFromChannelResult>;
   /** Removes ProductVariants from the specified Channel */
   removeProductVariantsFromChannel: Array<ProductVariant>;
   /** Removes all ProductVariants of Product from the specified Channel */
@@ -3297,6 +3311,11 @@ export type MutationAssignFacetsToChannelArgs = {
 
 export type MutationAssignPaymentMethodsToChannelArgs = {
   input: AssignPaymentMethodsToChannelInput;
+};
+
+
+export type MutationAssignProductOptionGroupsToChannelArgs = {
+  input: AssignProductOptionGroupsToChannelInput;
 };
 
 
@@ -3624,6 +3643,18 @@ export type MutationDeleteProductOptionArgs = {
 };
 
 
+export type MutationDeleteProductOptionGroupArgs = {
+  force?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteProductOptionGroupsArgs = {
+  force?: InputMaybe<Scalars['Boolean']['input']>;
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
 export type MutationDeleteProductVariantArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3809,6 +3840,11 @@ export type MutationRemoveOptionGroupFromProductArgs = {
 
 export type MutationRemovePaymentMethodsFromChannelArgs = {
   input: RemovePaymentMethodsFromChannelInput;
+};
+
+
+export type MutationRemoveProductOptionGroupsFromChannelArgs = {
+  input: RemoveProductOptionGroupsFromChannelInput;
 };
 
 
@@ -4970,6 +5006,53 @@ export type ProductOptionGroup = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type ProductOptionGroupFilterParameter = {
+  _and?: InputMaybe<Array<ProductOptionGroupFilterParameter>>;
+  _or?: InputMaybe<Array<ProductOptionGroupFilterParameter>>;
+  code?: InputMaybe<StringOperators>;
+  createdAt?: InputMaybe<DateOperators>;
+  id?: InputMaybe<IdOperators>;
+  languageCode?: InputMaybe<StringOperators>;
+  name?: InputMaybe<StringOperators>;
+  updatedAt?: InputMaybe<DateOperators>;
+};
+
+export type ProductOptionGroupInUseError = ErrorResult & {
+  __typename?: 'ProductOptionGroupInUseError';
+  errorCode: ErrorCode;
+  message: Scalars['String']['output'];
+  optionGroupCode: Scalars['String']['output'];
+  productCount: Scalars['Int']['output'];
+  variantCount: Scalars['Int']['output'];
+};
+
+export type ProductOptionGroupList = PaginatedList & {
+  __typename?: 'ProductOptionGroupList';
+  items: Array<ProductOptionGroup>;
+  totalItems: Scalars['Int']['output'];
+};
+
+export type ProductOptionGroupListOptions = {
+  /** Allows the results to be filtered */
+  filter?: InputMaybe<ProductOptionGroupFilterParameter>;
+  /** Specifies whether multiple top-level "filter" fields should be combined with a logical AND or OR operation. Defaults to AND. */
+  filterOperator?: InputMaybe<LogicalOperator>;
+  /** Skips the first n results, for use in pagination */
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  /** Specifies which properties to sort the results by */
+  sort?: InputMaybe<ProductOptionGroupSortParameter>;
+  /** Takes n results, for use in pagination */
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ProductOptionGroupSortParameter = {
+  code?: InputMaybe<SortOrder>;
+  createdAt?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  name?: InputMaybe<SortOrder>;
+  updatedAt?: InputMaybe<SortOrder>;
+};
+
 export type ProductOptionGroupTranslation = {
   __typename?: 'ProductOptionGroupTranslation';
   createdAt: Scalars['DateTime']['output'];
@@ -5405,7 +5488,7 @@ export type Query = {
   product?: Maybe<Product>;
   productOption?: Maybe<ProductOption>;
   productOptionGroup?: Maybe<ProductOptionGroup>;
-  productOptionGroups: Array<ProductOptionGroup>;
+  productOptionGroups: ProductOptionGroupList;
   productOptions: ProductOptionList;
   /** Get a ProductVariant by id */
   productVariant?: Maybe<ProductVariant>;
@@ -5630,7 +5713,7 @@ export type QueryProductOptionGroupArgs = {
 
 
 export type QueryProductOptionGroupsArgs = {
-  filterTerm?: InputMaybe<Scalars['String']['input']>;
+  options?: InputMaybe<ProductOptionGroupListOptions>;
 };
 
 
@@ -5929,6 +6012,14 @@ export type RemoveOrderItemsResult = Order | OrderInterceptorError | OrderModifi
 export type RemovePaymentMethodsFromChannelInput = {
   channelId: Scalars['ID']['input'];
   paymentMethodIds: Array<Scalars['ID']['input']>;
+};
+
+export type RemoveProductOptionGroupFromChannelResult = ProductOptionGroup | ProductOptionGroupInUseError;
+
+export type RemoveProductOptionGroupsFromChannelInput = {
+  channelId: Scalars['ID']['input'];
+  force?: InputMaybe<Scalars['Boolean']['input']>;
+  productOptionGroupIds: Array<Scalars['ID']['input']>;
 };
 
 export type RemoveProductVariantsFromChannelInput = {
