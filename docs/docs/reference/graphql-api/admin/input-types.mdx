@@ -471,6 +471,23 @@ generated: true
 }`}
 </GraphQLDoc>
 
+<a name="assignproductoptiongroupstochannelinput"></a>
+
+## AssignProductOptionGroupsToChannelInput
+
+<GraphQLDoc
+  type="input"
+  typeName="AssignProductOptionGroupsToChannelInput"
+  typeLinks={{
+    ID: '/reference/graphql-api/admin/object-types#id',
+  }}
+>
+{`input AssignProductOptionGroupsToChannelInput {
+  productOptionGroupIds: [ID!]!
+  channelId: ID!
+}`}
+</GraphQLDoc>
+
 <a name="assignproductvariantstochannelinput"></a>
 
 ## AssignProductVariantsToChannelInput
@@ -1387,7 +1404,7 @@ input CreateApiKeyInput {
 {`input CreateProductOptionGroupInput {
   code: String!
   translations: [ProductOptionGroupTranslationInput!]!
-  options: [CreateGroupOptionInput!]!
+  options: [CreateGroupOptionInput!]
   customFields: JSON
 }`}
 </GraphQLDoc>
@@ -2880,6 +2897,7 @@ input NumberOperators {
 {`input ProductFilterParameter {
   facetValueId: IDOperators
   sku: StringOperators
+  optionGroupId: IDOperators
   id: IDOperators
   createdAt: DateOperators
   updatedAt: DateOperators
@@ -2945,6 +2963,83 @@ input NumberOperators {
   groupId: IDOperators
   _and: [ProductOptionFilterParameter!]
   _or: [ProductOptionFilterParameter!]
+}`}
+</GraphQLDoc>
+
+<a name="productoptiongroupfilterparameter"></a>
+
+## ProductOptionGroupFilterParameter
+
+<GraphQLDoc
+  type="input"
+  typeName="ProductOptionGroupFilterParameter"
+  typeLinks={{
+    IDOperators: '/reference/graphql-api/admin/input-types#idoperators',
+    DateOperators: '/reference/graphql-api/admin/input-types#dateoperators',
+    StringOperators: '/reference/graphql-api/admin/input-types#stringoperators',
+    NumberOperators: '/reference/graphql-api/admin/input-types#numberoperators',
+    ProductOptionGroupFilterParameter: '/reference/graphql-api/admin/input-types#productoptiongroupfilterparameter',
+  }}
+>
+{`input ProductOptionGroupFilterParameter {
+  id: IDOperators
+  createdAt: DateOperators
+  updatedAt: DateOperators
+  languageCode: StringOperators
+  code: StringOperators
+  name: StringOperators
+  productCount: NumberOperators
+  _and: [ProductOptionGroupFilterParameter!]
+  _or: [ProductOptionGroupFilterParameter!]
+}`}
+</GraphQLDoc>
+
+<a name="productoptiongrouplistoptions"></a>
+
+## ProductOptionGroupListOptions
+
+<GraphQLDoc
+  type="input"
+  typeName="ProductOptionGroupListOptions"
+  typeLinks={{
+    Int: '/reference/graphql-api/admin/object-types#int',
+    ProductOptionGroupSortParameter: '/reference/graphql-api/admin/input-types#productoptiongroupsortparameter',
+    ProductOptionGroupFilterParameter: '/reference/graphql-api/admin/input-types#productoptiongroupfilterparameter',
+    LogicalOperator: '/reference/graphql-api/admin/enums#logicaloperator',
+  }}
+>
+{`input ProductOptionGroupListOptions {
+  """Skips the first n results, for use in pagination"""
+  skip: Int
+  """Takes n results, for use in pagination"""
+  take: Int
+  """Specifies which properties to sort the results by"""
+  sort: ProductOptionGroupSortParameter
+  """Allows the results to be filtered"""
+  filter: ProductOptionGroupFilterParameter
+  """Specifies whether multiple top-level "filter" fields should be combined with a logical AND or OR operation. Defaults to AND."""
+  filterOperator: LogicalOperator
+}`}
+</GraphQLDoc>
+
+<a name="productoptiongroupsortparameter"></a>
+
+## ProductOptionGroupSortParameter
+
+<GraphQLDoc
+  type="input"
+  typeName="ProductOptionGroupSortParameter"
+  typeLinks={{
+    SortOrder: '/reference/graphql-api/admin/enums#sortorder',
+  }}
+>
+{`input ProductOptionGroupSortParameter {
+  id: SortOrder
+  createdAt: SortOrder
+  updatedAt: SortOrder
+  code: SortOrder
+  name: SortOrder
+  productCount: SortOrder
 }`}
 </GraphQLDoc>
 
@@ -3492,6 +3587,25 @@ input NumberOperators {
 {`input RemovePaymentMethodsFromChannelInput {
   paymentMethodIds: [ID!]!
   channelId: ID!
+}`}
+</GraphQLDoc>
+
+<a name="removeproductoptiongroupsfromchannelinput"></a>
+
+## RemoveProductOptionGroupsFromChannelInput
+
+<GraphQLDoc
+  type="input"
+  typeName="RemoveProductOptionGroupsFromChannelInput"
+  typeLinks={{
+    ID: '/reference/graphql-api/admin/object-types#id',
+    Boolean: '/reference/graphql-api/admin/object-types#boolean',
+  }}
+>
+{`input RemoveProductOptionGroupsFromChannelInput {
+  productOptionGroupIds: [ID!]!
+  channelId: ID!
+  force: Boolean
 }`}
 </GraphQLDoc>
 
