@@ -6,12 +6,12 @@ import { ListPage } from '@/vdb/framework/page/list-page.js';
 import { api } from '@/vdb/graphql/api.js';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { FetchQueryOptions, useQueries, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { ExpandedState, getExpandedRowModel } from '@tanstack/react-table';
 import { TableOptions } from '@tanstack/table-core';
 import { ResultOf } from 'gql.tada';
 import { Folder, FolderOpen, PlusIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 import { RichTextDescriptionCell } from '@/vdb/components/shared/table-cell/order-table-cell-components.js';
@@ -33,9 +33,29 @@ import {
 import { CollectionContentsSheet } from './components/collection-contents-sheet.js';
 
 
+function parseExpandedParam(expanded?: string): ExpandedState {
+    if (!expanded) return {};
+    const ids = expanded.split(',').filter(Boolean);
+    return Object.fromEntries(ids.map(id => [id, true]));
+}
+
+function serializeExpandedState(expanded: ExpandedState): string | undefined {
+    if (expanded === true) return undefined;
+    const ids = Object.entries(expanded)
+        .filter(([_, v]) => v)
+        .map(([id]) => id);
+    return ids.length > 0 ? ids.join(',') : undefined;
+}
+
 export const Route = createFileRoute('/_authenticated/_collections/collections')({
     component: CollectionListPage,
     loader: () => ({ breadcrumb: () => <Trans>Collections</Trans> }),
+    validateSearch: (search: Record<string, unknown>) => {
+        return {
+            ...search,
+            expanded: (search.expanded as string) || undefined,
+        };
+    },
 });
 
 
@@ -61,12 +81,28 @@ function isLoadMoreRow(row: CollectionOrLoadMore): row is LoadMoreRow {
 function CollectionListPage() {
     const { t } = useLingui();
     const queryClient = useQueryClient();
-    const [expanded, setExpanded] = useState<ExpandedState>({});
+    const routeSearch = Route.useSearch();
+    const navigate = useNavigate({ from: Route.fullPath });
+    const [expanded, setExpandedState] = useState<ExpandedState>(() => parseExpandedParam(routeSearch.expanded));
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [accumulatedChildren, setAccumulatedChildren] = useState<
         Record<string, { items: Collection[]; totalItems: number }>
     >({});
     const [nextPageToFetch, setNextPageToFetch] = useState<Record<string, number>>({});
+
+    const setExpanded = useCallback((updater: ExpandedState | ((prev: ExpandedState) => ExpandedState)) => {
+        setExpandedState(prev => {
+            const next = typeof updater === 'function' ? updater(prev) : updater;
+            navigate({
+                search: (old: Record<string, unknown>) => ({
+                    ...old,
+                    expanded: serializeExpandedState(next),
+                }),
+                replace: true,
+            });
+            return next;
+        });
+    }, [navigate]);
 
     useQueries({
         queries: expanded === true ? [] : Object.entries(expanded)
