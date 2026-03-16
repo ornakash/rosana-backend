@@ -18,12 +18,14 @@ export const shippingEligibilityCheckersDocument = graphql(
 interface ShippingEligibilityCheckerSelectorProps {
     value: ConfigurableOperationInputType | undefined;
     onChange: (value: ConfigurableOperationInputType | undefined) => void;
+    onValidityChange?: (isValid: boolean) => void;
 }
 
 export function ShippingEligibilityCheckerSelector({
     value,
     onChange,
-}: ShippingEligibilityCheckerSelectorProps) {
+    onValidityChange,
+}: Readonly<ShippingEligibilityCheckerSelectorProps>) {
     const { t } = useLingui();
     return (
         <ConfigurableOperationSelector
@@ -33,6 +35,7 @@ export function ShippingEligibilityCheckerSelector({
             queryKey="shippingEligibilityCheckers"
             dataPath="shippingEligibilityCheckers"
             buttonText={t`Select Shipping Eligibility Checker`}
+            onValidityChange={onValidityChange}
         />
     );
 }

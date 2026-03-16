@@ -6,9 +6,14 @@ import { useLingui } from '@lingui/react/macro';
 export interface CollectionFiltersSelectorProps {
     value: ConfigurableOperationInputType[];
     onChange: (filters: ConfigurableOperationInputType[]) => void;
+    onValidityChange?: (isValid: boolean) => void;
 }
 
-export function CollectionFiltersSelector({ value, onChange }: Readonly<CollectionFiltersSelectorProps>) {
+export function CollectionFiltersSelector({
+    value,
+    onChange,
+    onValidityChange,
+}: Readonly<CollectionFiltersSelectorProps>) {
     const { t } = useLingui();
     return (
         <div className="mt-4">
@@ -20,6 +25,7 @@ export function CollectionFiltersSelector({ value, onChange }: Readonly<Collecti
                 dataPath="collectionFilters"
                 buttonText={t`Add collection filter`}
                 showEnhancedDropdown={false}
+                onValidityChange={onValidityChange}
             />
         </div>
     );
