@@ -4,6 +4,7 @@ import {
     DashboardHistoryEntryComponent,
     DashboardLoginExtensions,
     DashboardPageBlockDefinition,
+    DashboardRouteDefinition,
     DashboardWidgetDefinition,
 } from '@/vdb/framework/extension-api/types/index.js';
 import { DashboardFormComponent } from '@/vdb/framework/form-engine/form-engine-types.js';
@@ -18,6 +19,7 @@ export interface GlobalRegistryContents {
     extensionSourceChangeCallbacks: Set<() => void>;
     registerDashboardExtensionCallbacks: Set<() => void>;
     navMenuConfig: NavMenuConfig;
+    extensionRoutes: Map<string, DashboardRouteDefinition>;
     dashboardActionBarItemRegistry: Map<string, DashboardActionBarItem[]>;
     dashboardPageBlockRegistry: Map<string, DashboardPageBlockDefinition[]>;
     dashboardWidgetRegistry: Map<string, DashboardWidgetDefinition>;

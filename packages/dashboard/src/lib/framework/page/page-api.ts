@@ -1,9 +1,14 @@
 import { DashboardRouteDefinition } from '../extension-api/types/navigation.js';
+import { globalRegistry } from '../registry/global-registry.js';
 
-export const extensionRoutes = new Map<string, DashboardRouteDefinition>();
+globalRegistry.register('extensionRoutes', new Map<string, DashboardRouteDefinition>());
+
+export function getExtensionRoutes(): Map<string, DashboardRouteDefinition> {
+    return globalRegistry.get('extensionRoutes');
+}
 
 export function registerRoute(config: DashboardRouteDefinition) {
     if (config.path) {
-        extensionRoutes.set(config.path, config);
+        globalRegistry.get('extensionRoutes').set(config.path, config);
     }
 }

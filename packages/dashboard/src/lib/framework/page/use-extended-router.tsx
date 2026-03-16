@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { ErrorPage } from '../../components/shared/error-page.js';
 import { AUTHENTICATED_ROUTE_PREFIX } from '../../constants.js';
 import { useDashboardExtensions } from '../extension-api/use-dashboard-extensions.js';
-import { extensionRoutes } from './page-api.js';
+import { getExtensionRoutes } from './page-api.js';
 
 /**
  * Creates a TanStack Router with the base route tree extended with additional
@@ -39,7 +39,7 @@ export const useExtendedRouter = (
         const newRootRoutes: AnyRoute[] = [];
 
         // Create new routes for each extension
-        for (const [path, config] of extensionRoutes.entries()) {
+        for (const [path, config] of getExtensionRoutes().entries()) {
             const pathWithoutLeadingSlash = path.startsWith('/') ? path.slice(1) : path;
 
             // Check if route should be authenticated (default is true)
