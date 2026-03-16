@@ -36,6 +36,8 @@ html[dir="rtl"] * {
     --color-destructive-foreground: var(--destructive-foreground);
     --color-success: var(--success);
     --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
     --color-dev-mode: var(--dev-mode);
     --color-dev-mode-foreground: var(--dev-mode-foreground);
     --color-border: var(--border);

@@ -19,6 +19,8 @@ type ThemeColors = {
     'destructive-foreground'?: string;
     success?: string;
     'success-foreground'?: string;
+    warning?: string;
+    'warning-foreground'?: string;
     'dev-mode'?: string;
     'dev-mode-foreground'?: string;
     border?: string;
@@ -71,6 +73,8 @@ const defaultVariables: ThemeVariables = {
         'destructive-foreground': 'oklch(0.9851 0 0)',
         success: 'hsl(99deg 67.25% 33.2%)',
         'success-foreground': 'hsl(0 0% 98%)',
+        warning: 'hsl(38 92% 36%)',
+        'warning-foreground': 'hsl(0 0% 98%)',
         'dev-mode': 'hsl(204, 76%, 62%)',
         'dev-mode-foreground': 'hsl(0 0% 98%)',
         border: 'oklch(0.9197 0.0040 286.3202)',
@@ -115,6 +119,8 @@ const defaultVariables: ThemeVariables = {
         'destructive-foreground': 'oklch(0.9851 0 0)',
         success: 'hsl(100 76.42% 22.21%)',
         'success-foreground': 'hsl(0 0% 98%)',
+        warning: 'hsl(38 80% 36%)',
+        'warning-foreground': 'hsl(0 0% 98%)',
         'dev-mode': 'hsl(204, 86%, 53%)',
         'dev-mode-foreground': 'hsl(0 0% 98%)',
         border: 'oklch(0.2739 0.0055 286.0326)',
