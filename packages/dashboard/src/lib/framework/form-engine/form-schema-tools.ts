@@ -176,23 +176,17 @@ function createCustomFieldValidationSchema(customField: CustomFieldConfig): ZodT
         case 'localeString':
         case 'localeText':
         case 'string':
-            zodType = createStringValidationSchema((customField as StringCustomFieldConfig).pattern);
+            zodType = createStringValidationSchema(customField.pattern);
             break;
         case 'int':
-            zodType = createNumberValidationSchema(
-                (customField as IntCustomFieldConfig).intMin,
-                (customField as IntCustomFieldConfig).intMax,
-            );
+            zodType = createNumberValidationSchema(customField.intMin, customField.intMax);
             break;
         case 'float':
-            zodType = createNumberValidationSchema(
-                (customField as FloatCustomFieldConfig).floatMin,
-                (customField as FloatCustomFieldConfig).floatMax,
-            );
+            zodType = createNumberValidationSchema(customField.floatMin, customField.floatMax);
             break;
         case 'datetime': {
-            const minDate = parseDate((customField as DateTimeCustomFieldConfig).datetimeMin);
-            const maxDate = parseDate((customField as DateTimeCustomFieldConfig).datetimeMax);
+            const minDate = parseDate(customField.datetimeMin);
+            const maxDate = parseDate(customField.datetimeMax);
             zodType = createDateValidationSchema(minDate, maxDate);
             break;
         }
@@ -419,17 +413,13 @@ export function getZodTypeFromField(field: FieldInfo): ZodTypeAny {
 
     switch (field.type) {
         case 'String':
+        case 'DateTime':
             zodType = field.nullable
                 ? z.string()
                 : z.string().min(1, { message: VALIDATION_MESSAGES.REQUIRED });
             break;
         case 'ID':
             zodType = z.string();
-            break;
-        case 'DateTime':
-            zodType = field.nullable
-                ? z.string()
-                : z.string().min(1, { message: VALIDATION_MESSAGES.REQUIRED });
             break;
         case 'Int':
         case 'Float':
