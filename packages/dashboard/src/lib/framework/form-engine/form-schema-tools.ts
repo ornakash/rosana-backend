@@ -419,7 +419,13 @@ export function getZodTypeFromField(field: FieldInfo): ZodTypeAny {
 
     switch (field.type) {
         case 'String':
+            zodType = field.nullable
+                ? z.string()
+                : z.string().min(1, { message: VALIDATION_MESSAGES.REQUIRED });
+            break;
         case 'ID':
+            zodType = z.string();
+            break;
         case 'DateTime':
             zodType = field.nullable
                 ? z.string()

@@ -80,12 +80,14 @@ describe('form-schema-tools', () => {
             expect(() => schema.parse(null)).not.toThrow();
         });
 
-        it('should reject empty strings for non-nullable ID fields', () => {
+        it('should accept empty strings for non-nullable ID fields', () => {
+            // ID fields are server-assigned and default to '' for new entities,
+            // so they must not have min(1) validation applied.
             const field = createMockField('id', 'ID', false);
             const schema = getZodTypeFromField(field);
 
             expect(() => schema.parse('123')).not.toThrow();
-            expect(() => schema.parse('')).toThrow();
+            expect(() => schema.parse('')).not.toThrow();
         });
 
         it('should reject empty strings for non-nullable DateTime fields', () => {
@@ -622,8 +624,7 @@ describe('form-schema-tools', () => {
             const fields: FieldInfo[] = [
                 createMockField('translations', 'Object', false, true, [
                     createMockField('id', 'ID'),
-                    createMockField('languageCode', 'String'),
-                    createMockField('name', 'String'),
+                    createMockField('languageCode', 'LanguageCode'),
                     {
                         name: 'customFields',
                         type: 'CustomFieldsInput',
