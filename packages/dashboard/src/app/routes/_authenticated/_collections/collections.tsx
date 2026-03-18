@@ -11,7 +11,7 @@ import { ExpandedState, getExpandedRowModel } from '@tanstack/react-table';
 import { TableOptions } from '@tanstack/table-core';
 import { ResultOf } from 'gql.tada';
 import { Folder, FolderOpen, PlusIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { RichTextDescriptionCell } from '@/vdb/components/shared/table-cell/order-table-cell-components.js';
@@ -104,7 +104,13 @@ function CollectionListPage() {
         });
     }, [navigate]);
 
-    useQueries({
+    // NOTE: queryFn must be pure (no setState side effects) because TanStack Query
+    // skips queryFn entirely when data is served from cache (staleTime: 5min). If we
+    // called setAccumulatedChildren inside queryFn, a re-mounted component would get
+    // cache hits but accumulatedChildren would never be populated, so children wouldn't
+    // render. Instead we sync via useEffect below, which fires for both cache hits and
+    // fresh fetches.
+    const firstPageChildQueries = useQueries({
         queries: expanded === true ? [] : Object.entries(expanded)
             .filter(([collectionId]) => !accumulatedChildren[collectionId])
             .map(([collectionId]) => {
@@ -120,19 +126,33 @@ function CollectionListPage() {
                                 skip: 0,
                             },
                         });
-                        setAccumulatedChildren(prev => ({
-                            ...prev,
-                            [collectionId]: {
-                                items: result.collections.items,
-                                totalItems: result.collections.totalItems,
-                            },
-                        }));
-                        return result;
+                        return {
+                            collectionId,
+                            items: result.collections.items,
+                            totalItems: result.collections.totalItems,
+                        };
                     },
                     staleTime: 1000 * 60 * 5,
                 } satisfies FetchQueryOptions;
             }),
     });
+
+    useEffect(() => {
+        const newChildren: Record<string, { items: Collection[]; totalItems: number }> = {};
+        let hasNew = false;
+        for (const query of firstPageChildQueries) {
+            if (query.data && !accumulatedChildren[query.data.collectionId]) {
+                newChildren[query.data.collectionId] = {
+                    items: query.data.items as Collection[],
+                    totalItems: query.data.totalItems,
+                };
+                hasNew = true;
+            }
+        }
+        if (hasNew) {
+            setAccumulatedChildren(prev => ({ ...prev, ...newChildren }));
+        }
+    }, [firstPageChildQueries]);
 
     useQueries({
         queries: Object.entries(nextPageToFetch)

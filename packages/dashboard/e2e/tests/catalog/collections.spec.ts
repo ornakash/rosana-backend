@@ -4,6 +4,138 @@ import { BaseDetailPage } from '../../page-objects/detail-page.base.js';
 import { createCrudTestSuite } from '../../utils/crud-test-factory.js';
 import { VendureAdminClient } from '../../utils/vendure-admin-client.js';
 
+// #4388 — When navigating to a collection detail page and back, the previously
+// expanded collection rows should be re-expanded. The fix persists expanded IDs
+// in the URL (?expanded=1,2) so the tree is restored on re-mount.
+test.describe('Issue #4388: Collection tree expanded state persists in URL', () => {
+    test.describe.configure({ mode: 'serial' });
+
+    let parentId: string;
+    let childId: string;
+    const PARENT_NAME = 'E2E Expand Test Parent';
+    const CHILD_NAME = 'E2E Expand Test Child';
+
+    test.beforeAll(async ({ browser }) => {
+        const page = await browser.newPage();
+        const client = new VendureAdminClient(page);
+        await client.login();
+
+        const { createCollection: parent } = await client.gql(
+            `mutation ($input: CreateCollectionInput!) {
+                createCollection(input: $input) { id }
+            }`,
+            {
+                input: {
+                    translations: [
+                        { languageCode: 'en', name: PARENT_NAME, slug: 'e2e-expand-parent', description: '' },
+                    ],
+                },
+            },
+        );
+        parentId = parent.id as string;
+
+        const { createCollection: child } = await client.gql(
+            `mutation ($input: CreateCollectionInput!) {
+                createCollection(input: $input) { id }
+            }`,
+            {
+                input: {
+                    parentId,
+                    translations: [
+                        { languageCode: 'en', name: CHILD_NAME, slug: 'e2e-expand-child', description: '' },
+                    ],
+                },
+            },
+        );
+        childId = child.id as string;
+        await page.close();
+    });
+
+    test.afterAll(async ({ browser }) => {
+        const page = await browser.newPage();
+        const client = new VendureAdminClient(page);
+        await client.login();
+        if (childId) {
+            await client.gql(`mutation ($id: ID!) { deleteCollection(id: $id) { result } }`, { id: childId });
+        }
+        if (parentId) {
+            await client.gql(`mutation ($id: ID!) { deleteCollection(id: $id) { result } }`, {
+                id: parentId,
+            });
+        }
+        await page.close();
+    });
+
+    test('should add the expanded collection ID to the URL search params', async ({ page }) => {
+        await page.goto('/collections');
+        await expect(page.getByRole('heading', { name: 'Collections' })).toBeVisible();
+
+        // The expand button is the first button in the parent collection's row
+        const parentRow = page.locator('tbody tr').filter({ has: page.getByText(PARENT_NAME) });
+        const expandButton = parentRow.getByRole('button').first();
+        await expect(expandButton).toBeEnabled({ timeout: 10_000 });
+        await expandButton.click();
+
+        // Child collection should appear in the tree
+        await expect(page.getByText(CHILD_NAME)).toBeVisible({ timeout: 5_000 });
+
+        // URL must contain ?expanded=<parentId>
+        await expect(page).toHaveURL(new RegExp(`[?&]expanded=${parentId}`));
+    });
+
+    // This test targets the ROOT CAUSE: queryFn side effects are skipped for TanStack
+    // Query cache hits, so accumulatedChildren is never populated on re-mount. The fix
+    // syncs cache results to accumulatedChildren via useEffect instead.
+    test('should be expandable after navigating directly to detail page without prior expansion', async ({
+        page,
+    }) => {
+        await page.goto('/collections');
+        await expect(page.getByRole('heading', { name: 'Collections' })).toBeVisible();
+
+        // Navigate directly to the collection detail — no expansion beforehand,
+        // so no ?expanded= param will be in the URL when we return
+        const parentRow = page.locator('tbody tr').filter({ has: page.getByText(PARENT_NAME) });
+        await parentRow.getByRole('link').first().click();
+        await page.waitForURL(`/collections/${parentId}`, { timeout: 10_000 });
+
+        // Navigate back — URL has no ?expanded= param
+        await page.goBack();
+        await page.waitForURL(/\/collections(\?|$)/, { timeout: 10_000 });
+        await expect(page).not.toHaveURL(/[?&]expanded=/);
+
+        // The expand button should be enabled and clicking it should show children
+        const parentRowAfterBack = page.locator('tbody tr').filter({ has: page.getByText(PARENT_NAME) });
+        const expandButton = parentRowAfterBack.getByRole('button').first();
+        await expect(expandButton).toBeEnabled({ timeout: 10_000 });
+        await expandButton.click();
+        await expect(page.getByText(CHILD_NAME)).toBeVisible({ timeout: 5_000 });
+    });
+
+    test('should restore expanded tree after navigating to a collection detail and back', async ({
+        page,
+    }) => {
+        await page.goto('/collections');
+        await expect(page.getByRole('heading', { name: 'Collections' })).toBeVisible();
+
+        // Expand the parent collection
+        const parentRow = page.locator('tbody tr').filter({ has: page.getByText(PARENT_NAME) });
+        await parentRow.getByRole('button').first().click();
+        await expect(page.getByText(CHILD_NAME)).toBeVisible({ timeout: 5_000 });
+
+        // Navigate to the parent collection's detail page
+        await parentRow.getByRole('link').first().click();
+        await page.waitForURL(`/collections/${parentId}`, { timeout: 10_000 });
+        await expect(page.getByRole('heading', { name: PARENT_NAME })).toBeVisible({ timeout: 10_000 });
+
+        // Navigate back — the URL still carries ?expanded=<parentId>
+        await page.goBack();
+        await page.waitForURL(/\/collections(\?|$)/, { timeout: 10_000 });
+
+        // Child should still be visible — expanded state was restored from URL
+        await expect(page.getByText(CHILD_NAME)).toBeVisible({ timeout: 5_000 });
+    });
+});
+
 createCrudTestSuite({
     entityName: 'collection',
     entityNamePlural: 'collections',
