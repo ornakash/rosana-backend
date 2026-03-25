@@ -33,45 +33,42 @@ import { FieldInfo } from '../document-introspection/get-document-structure.js';
  * @returns A new entity with transformed relation fields
  */
 export function transformRelationFields<E extends Record<string, any>>(fields: FieldInfo[], entity: E): E {
-    // Create a shallow copy to avoid mutating the original entity
-    const processedEntity = { ...entity, customFields: { ...(entity.customFields ?? {}) } };
+    const processedEntity = structuredClone(entity);
 
-    // Skip processing if there are no custom fields
-    if (!entity.customFields || !processedEntity.customFields) {
-        return processedEntity;
-    }
+    function processCustomFields(obj: any, fieldDefs: FieldInfo[]) {
+        for (const field of fieldDefs) {
+            if (field.name === 'customFields' && field.typeInfo && obj[field.name]) {
+                const customFields = obj[field.name];
+                const idTypeCustomFields = field.typeInfo.filter(f => f.type === 'ID');
 
-    // Find the customFields field info
-    const customFieldsInfo = fields.find(field => field.name === 'customFields' && field.typeInfo);
-    if (!customFieldsInfo?.typeInfo) {
-        return processedEntity;
-    }
+                for (const customField of idTypeCustomFields) {
+                    const relationField = customField.name;
 
-    // Process only ID type custom fields
-    const idTypeCustomFields = customFieldsInfo.typeInfo.filter(field => field.type === 'ID');
+                    if (customField.list) {
+                        const propertyAccessorKey = customField.name.replace(/Ids$/, '');
+                        const relationValue = customFields[propertyAccessorKey];
 
-    for (const customField of idTypeCustomFields) {
-        const relationField = customField.name;
-
-        if (customField.list) {
-            // For list fields, the accessor is the field name without the "Ids" suffix
-            const propertyAccessorKey = customField.name.replace(/Ids$/, '');
-            const relationValue = entity.customFields[propertyAccessorKey];
-
-            if (relationValue === null) {
-                processedEntity.customFields[relationField] = null;
-            } else if (Array.isArray(relationValue)) {
-                processedEntity.customFields[relationField] = relationValue.map((v: { id: string }) => v.id);
+                        if (relationValue === null) {
+                            customFields[relationField] = null;
+                        } else if (Array.isArray(relationValue)) {
+                            customFields[relationField] = relationValue.map((v: { id: string }) => v.id);
+                        }
+                        delete customFields[propertyAccessorKey];
+                    } else {
+                        const propertyAccessorKey = customField.name.replace(/Id$/, '');
+                        const relationValue = customFields[propertyAccessorKey];
+                        customFields[relationField] = relationValue === null ? null : relationValue?.id;
+                        delete customFields[propertyAccessorKey];
+                    }
+                }
+            } else if (field.typeInfo && typeof obj[field.name] === 'object' && obj[field.name] !== null) {
+                // Recurse into nested objects to find customFields at any depth
+                processCustomFields(obj[field.name], field.typeInfo);
             }
-            delete processedEntity.customFields[propertyAccessorKey];
-        } else {
-            // For single fields, the accessor is the field name without the "Id" suffix
-            const propertyAccessorKey = customField.name.replace(/Id$/, '');
-            const relationValue = entity.customFields[propertyAccessorKey];
-            processedEntity.customFields[relationField] = relationValue === null ? null : relationValue?.id;
-            delete processedEntity.customFields[propertyAccessorKey];
         }
     }
+
+    processCustomFields(processedEntity, fields);
     return processedEntity;
 }
 

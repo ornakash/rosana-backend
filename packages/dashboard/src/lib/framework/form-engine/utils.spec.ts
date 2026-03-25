@@ -184,6 +184,70 @@ describe('transformRelationFields', () => {
 
         expect(result.customFields).toEqual({ featuredProductsIds: ['1'], notes: 'Some notes' });
     });
+
+    it('should handle customFields nested inside an input object (draft order pattern)', () => {
+        const fields: FieldInfo[] = [
+            {
+                name: 'orderId',
+                type: 'ID',
+                nullable: false,
+                list: false,
+                isPaginatedList: false,
+                isScalar: true,
+            },
+            {
+                name: 'input',
+                type: 'UpdateOrderInput',
+                nullable: false,
+                list: false,
+                isPaginatedList: false,
+                isScalar: false,
+                typeInfo: [
+                    {
+                        name: 'id',
+                        type: 'ID',
+                        nullable: false,
+                        list: false,
+                        isPaginatedList: false,
+                        isScalar: true,
+                    },
+                    {
+                        name: 'customFields',
+                        type: 'UpdateOrderCustomFieldsInput',
+                        nullable: true,
+                        list: false,
+                        isPaginatedList: false,
+                        isScalar: false,
+                        typeInfo: [
+                            {
+                                name: 'relatedEntityId',
+                                type: 'ID',
+                                nullable: true,
+                                list: false,
+                                isPaginatedList: false,
+                                isScalar: true,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+        const entity = {
+            orderId: '1',
+            input: {
+                id: '1',
+                customFields: {
+                    relatedEntity: { id: '3', name: 'Some Entity' },
+                },
+            },
+        };
+        const result = transformRelationFields(fields, entity);
+
+        expect(result.input.customFields).toEqual({ relatedEntityId: '3' });
+        expect(result.input.customFields).not.toHaveProperty('relatedEntity');
+        // Should not mutate original
+        expect(entity.input.customFields.relatedEntity).toEqual({ id: '3', name: 'Some Entity' });
+    });
 });
 
 describe('convertEmptyStringsToNull', () => {
