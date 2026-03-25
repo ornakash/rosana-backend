@@ -26,6 +26,7 @@ test.describe('Issue #4388: Collection tree expanded state persists in URL', () 
             }`,
             {
                 input: {
+                    filters: [],
                     translations: [
                         { languageCode: 'en', name: PARENT_NAME, slug: 'e2e-expand-parent', description: '' },
                     ],
@@ -41,6 +42,7 @@ test.describe('Issue #4388: Collection tree expanded state persists in URL', () 
             {
                 input: {
                     parentId,
+                    filters: [],
                     translations: [
                         { languageCode: 'en', name: CHILD_NAME, slug: 'e2e-expand-child', description: '' },
                     ],
