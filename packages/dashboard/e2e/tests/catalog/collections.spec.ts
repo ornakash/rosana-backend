@@ -72,14 +72,15 @@ test.describe('Issue #4388: Collection tree expanded state persists in URL', () 
         await page.goto('/collections');
         await expect(page.getByRole('heading', { name: 'Collections' })).toBeVisible();
 
-        // The expand button is the first button in the parent collection's row
+        // The expand button is inside the Name cell (not the drag-handle cell)
         const parentRow = page.locator('tbody tr').filter({ has: page.getByText(PARENT_NAME) });
-        const expandButton = parentRow.getByRole('button').first();
+        const nameCell = parentRow.locator('td').filter({ hasText: PARENT_NAME });
+        const expandButton = nameCell.getByRole('button');
         await expect(expandButton).toBeEnabled({ timeout: 10_000 });
         await expandButton.click();
 
         // Child collection should appear in the tree
-        await expect(page.getByText(CHILD_NAME)).toBeVisible({ timeout: 5_000 });
+        await expect(page.getByText(CHILD_NAME, { exact: true })).toBeVisible({ timeout: 5_000 });
 
         // URL must contain ?expanded=<parentId>
         await expect(page).toHaveURL(new RegExp(`[?&]expanded=${parentId}`));
@@ -107,10 +108,11 @@ test.describe('Issue #4388: Collection tree expanded state persists in URL', () 
 
         // The expand button should be enabled and clicking it should show children
         const parentRowAfterBack = page.locator('tbody tr').filter({ has: page.getByText(PARENT_NAME) });
-        const expandButton = parentRowAfterBack.getByRole('button').first();
+        const nameCell = parentRowAfterBack.locator('td').filter({ hasText: PARENT_NAME });
+        const expandButton = nameCell.getByRole('button');
         await expect(expandButton).toBeEnabled({ timeout: 10_000 });
         await expandButton.click();
-        await expect(page.getByText(CHILD_NAME)).toBeVisible({ timeout: 5_000 });
+        await expect(page.getByText(CHILD_NAME, { exact: true })).toBeVisible({ timeout: 5_000 });
     });
 
     test('should restore expanded tree after navigating to a collection detail and back', async ({
@@ -121,8 +123,9 @@ test.describe('Issue #4388: Collection tree expanded state persists in URL', () 
 
         // Expand the parent collection
         const parentRow = page.locator('tbody tr').filter({ has: page.getByText(PARENT_NAME) });
-        await parentRow.getByRole('button').first().click();
-        await expect(page.getByText(CHILD_NAME)).toBeVisible({ timeout: 5_000 });
+        const nameCell = parentRow.locator('td').filter({ hasText: PARENT_NAME });
+        await nameCell.getByRole('button').click();
+        await expect(page.getByText(CHILD_NAME, { exact: true })).toBeVisible({ timeout: 5_000 });
 
         // Navigate to the parent collection's detail page
         await parentRow.getByRole('link').first().click();
@@ -134,7 +137,7 @@ test.describe('Issue #4388: Collection tree expanded state persists in URL', () 
         await page.waitForURL(/\/collections(\?|$)/, { timeout: 10_000 });
 
         // Child should still be visible — expanded state was restored from URL
-        await expect(page.getByText(CHILD_NAME)).toBeVisible({ timeout: 5_000 });
+        await expect(page.getByText(CHILD_NAME, { exact: true })).toBeVisible({ timeout: 5_000 });
     });
 });
 
