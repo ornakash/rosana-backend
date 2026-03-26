@@ -435,6 +435,7 @@ function CollectionListPage() {
                     resetExpanded: () => setExpanded({}),
                     refreshChildCaches: () => {
                         queryClient.removeQueries({ queryKey: ['childCollections'] });
+                        queryClient.removeQueries({ queryKey: ['PaginatedListDataTable'] });
                         setAccumulatedChildren({});
                     },
                     isUtilityRow: (row: { original: CollectionOrLoadMore }) => isLoadMoreRow(row.original),
