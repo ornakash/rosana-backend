@@ -433,6 +433,10 @@ function CollectionListPage() {
                 options.meta = {
                     ...options.meta,
                     resetExpanded: () => setExpanded({}),
+                    refreshChildCaches: () => {
+                        queryClient.removeQueries({ queryKey: ['childCollections'] });
+                        setAccumulatedChildren({});
+                    },
                     isUtilityRow: (row: { original: CollectionOrLoadMore }) => isLoadMoreRow(row.original),
                     renderUtilityRow: (row: { original: CollectionOrLoadMore }) => {
                         const original = row.original as LoadMoreRow;
