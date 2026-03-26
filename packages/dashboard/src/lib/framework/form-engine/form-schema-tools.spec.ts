@@ -56,19 +56,14 @@ describe('form-schema-tools', () => {
             expect(() => schema.parse(123)).toThrow();
         });
 
-        it('should reject empty strings for non-nullable String fields', () => {
+        it('should accept empty strings for non-nullable String fields', () => {
+            // In GraphQL, String! means "not null", not "not empty".
+            // An empty string is a valid non-null string value.
             const field = createMockField('name', 'String', false);
             const schema = getZodTypeFromField(field);
 
             expect(() => schema.parse('test')).not.toThrow();
-            expect(() => schema.parse('')).toThrow();
-
-            try {
-                schema.parse('');
-                expect.fail('Should have thrown validation error');
-            } catch (error: any) {
-                expect(error.errors[0].message).toBe('This field is required');
-            }
+            expect(() => schema.parse('')).not.toThrow();
         });
 
         it('should accept empty strings for nullable String fields', () => {
@@ -90,12 +85,13 @@ describe('form-schema-tools', () => {
             expect(() => schema.parse('')).not.toThrow();
         });
 
-        it('should reject empty strings for non-nullable DateTime fields', () => {
+        it('should accept empty strings for non-nullable DateTime fields', () => {
+            // In GraphQL, DateTime! means "not null", not "not empty".
             const field = createMockField('date', 'DateTime', false);
             const schema = getZodTypeFromField(field);
 
             expect(() => schema.parse('2024-01-01')).not.toThrow();
-            expect(() => schema.parse('')).toThrow();
+            expect(() => schema.parse('')).not.toThrow();
         });
 
         it('should create number type for Int fields', () => {

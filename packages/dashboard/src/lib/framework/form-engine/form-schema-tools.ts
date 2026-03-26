@@ -19,7 +19,6 @@ import { z, ZodRawShape, ZodType, ZodTypeAny } from 'zod';
  * Provides consistent messaging across all form validations and enables future i18n support.
  */
 const VALIDATION_MESSAGES = {
-    REQUIRED: 'This field is required',
     pattern: (pattern: string) => `Value must match pattern: ${pattern}`,
     min: (min: number) => `Value must be at least ${min}`,
     max: (max: number) => `Value must be at most ${max}`,
@@ -414,9 +413,7 @@ export function getZodTypeFromField(field: FieldInfo): ZodTypeAny {
     switch (field.type) {
         case 'String':
         case 'DateTime':
-            zodType = field.nullable
-                ? z.string()
-                : z.string().min(1, { message: VALIDATION_MESSAGES.REQUIRED });
+            zodType = z.string();
             break;
         case 'ID':
             zodType = z.string();
