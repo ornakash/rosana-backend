@@ -282,6 +282,13 @@ function CollectionListPage() {
                 },
             });
 
+            // Remove query cache entries BEFORE clearing accumulated children
+            // to prevent stale cached data from being synced back by the useEffect.
+            queryClient.removeQueries({ queryKey: ['childCollections', sourceParentId] });
+            if (targetParentId !== sourceParentId) {
+                queryClient.removeQueries({ queryKey: ['childCollections', targetParentId] });
+            }
+
             setAccumulatedChildren(prev => {
                 const newState = { ...prev };
                 delete newState[sourceParentId];
@@ -291,19 +298,11 @@ function CollectionListPage() {
                 return newState;
             });
 
-            const queriesToInvalidate = [
-                queryClient.invalidateQueries({ queryKey: ['childCollections', sourceParentId] }),
-                queryClient.invalidateQueries({ queryKey: ['PaginatedListDataTable'] }),
-            ];
+            await queryClient.invalidateQueries({ queryKey: ['PaginatedListDataTable'] });
 
             if (targetParentId === sourceParentId) {
-                await Promise.all(queriesToInvalidate);
                 toast.success(t`Collection position updated`);
             } else {
-                queriesToInvalidate.push(
-                    queryClient.invalidateQueries({ queryKey: ['childCollections', targetParentId] })
-                );
-                await Promise.all(queriesToInvalidate);
                 toast.success(t`Collection moved to new parent`);
             }
         } catch (error) {
