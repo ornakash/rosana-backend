@@ -154,7 +154,7 @@ function CollectionListPage() {
         }
     }, [firstPageChildQueries]);
 
-    useQueries({
+    const pagedChildQueries = useQueries({
         queries: Object.entries(nextPageToFetch)
             .filter(([_, page]) => page > 0)
             .map(([collectionId, page]) => {
@@ -170,27 +170,48 @@ function CollectionListPage() {
                                 skip: page * CHILDREN_PAGE_SIZE,
                             },
                         });
-                        setAccumulatedChildren(prev => {
-                            const existing = prev[collectionId];
-                            if (!existing) return prev;
-                            return {
-                                ...prev,
-                                [collectionId]: {
-                                    items: [...existing.items, ...result.collections.items],
-                                    totalItems: result.collections.totalItems,
-                                },
-                            };
-                        });
-                        setNextPageToFetch(prev => {
-                            const { [collectionId]: _, ...rest } = prev;
-                            return rest;
-                        });
-                        return result;
+                        return {
+                            collectionId,
+                            items: result.collections.items,
+                            totalItems: result.collections.totalItems,
+                        };
                     },
                     staleTime: 1000 * 60 * 5,
                 } satisfies FetchQueryOptions;
             }),
     });
+
+    useEffect(() => {
+        let hasUpdates = false;
+        const childUpdates: Record<string, { items: Collection[]; totalItems: number }> = {};
+        const fetchedPages: string[] = [];
+        for (const query of pagedChildQueries) {
+            if (!query.data) continue;
+            const { collectionId, items, totalItems } = query.data as {
+                collectionId: string;
+                items: Collection[];
+                totalItems: number;
+            };
+            if (accumulatedChildren[collectionId]) {
+                childUpdates[collectionId] = {
+                    items: [...accumulatedChildren[collectionId].items, ...items],
+                    totalItems,
+                };
+                fetchedPages.push(collectionId);
+                hasUpdates = true;
+            }
+        }
+        if (hasUpdates) {
+            setAccumulatedChildren(prev => ({ ...prev, ...childUpdates }));
+            setNextPageToFetch(prev => {
+                const next = { ...prev };
+                for (const id of fetchedPages) {
+                    delete next[id];
+                }
+                return next;
+            });
+        }
+    }, [pagedChildQueries]);
 
     const addSubCollections = (data: Collection[]): CollectionOrLoadMore[] => {
         const allRows: CollectionOrLoadMore[] = [];

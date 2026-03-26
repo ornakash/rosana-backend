@@ -83,7 +83,9 @@ test.describe('Issue #4388: Collection tree expanded state persists in URL', () 
         await expect(page.getByText(CHILD_NAME, { exact: true })).toBeVisible({ timeout: 5_000 });
 
         // URL must contain ?expanded=<parentId>
-        await expect(page).toHaveURL(new RegExp(`[?&]expanded=${parentId}`));
+        await expect
+            .poll(() => new URL(page.url()).searchParams.get('expanded')?.split(',') ?? [])
+            .toContain(parentId);
     });
 
     // This test targets the ROOT CAUSE: queryFn side effects are skipped for TanStack
