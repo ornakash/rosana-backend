@@ -128,22 +128,6 @@ function isDroppingIntoExpandedTarget<T extends HierarchicalItem>(context: DragC
 }
 
 /**
- * Checks if dragging down into an expanded item's children area
- */
-function isDroppingIntoExpandedPreviousChildren<T extends HierarchicalItem>(
-    context: DragContext<T>,
-): boolean {
-    const { isDraggingDown, targetItem, previousItem, item, isPreviousExpanded } = context;
-    return (
-        isDraggingDown &&
-        previousItem !== null &&
-        targetItem?.id !== item.id &&
-        isPreviousExpanded &&
-        targetItem?.parentId === previousItem.id
-    );
-}
-
-/**
  * Checks if dragging up into an expanded item's children area
  */
 function isDroppingIntoExpandedPreviousWhenDraggingUp<T extends HierarchicalItem>(
@@ -171,10 +155,6 @@ function handleExpandedItemDrop<T extends HierarchicalItem>(context: DragContext
         return createFirstChildPosition(targetItem.id);
     }
 
-    if (previousItem && isDroppingIntoExpandedPreviousChildren(context)) {
-        return createFirstChildPosition(previousItem.id);
-    }
-
     if (previousItem && isDroppingIntoExpandedPreviousWhenDraggingUp(context)) {
         return createFirstChildPosition(previousItem.id);
     }
@@ -196,6 +176,7 @@ function calculateCrossParentPosition<T extends HierarchicalItem>(
     targetItem: T,
     sourceParentId: string,
     items: T[],
+    isDraggingDown: boolean,
 ): TargetPosition | null {
     const targetItemParentId = getItemParentId(targetItem);
 
@@ -204,7 +185,11 @@ function calculateCrossParentPosition<T extends HierarchicalItem>(
     }
 
     const targetSiblings = getItemSiblings(items, targetItemParentId);
-    const adjustedIndex = targetSiblings.findIndex(i => i.id === targetItem.id);
+    const targetIndex = targetSiblings.findIndex(i => i.id === targetItem.id);
+
+    // When dragging down, the visual indicator is below the target → insert after (+1).
+    // When dragging up, the indicator is above the target → insert before (same index).
+    const adjustedIndex = isDraggingDown ? targetIndex + 1 : targetIndex;
 
     return { targetParentId: targetItemParentId, adjustedIndex };
 }
@@ -266,7 +251,12 @@ export function calculateDragTargetPosition<T extends HierarchicalItem>(params: 
 
     // Handle cross-parent drag operations
     if (targetItem?.id !== item.id) {
-        const crossParentPosition = calculateCrossParentPosition(targetItem, sourceParentId, items);
+        const crossParentPosition = calculateCrossParentPosition(
+            targetItem,
+            sourceParentId,
+            items,
+            context.isDraggingDown,
+        );
         if (crossParentPosition) {
             return crossParentPosition;
         }
