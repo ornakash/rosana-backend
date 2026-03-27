@@ -8,6 +8,7 @@ on:
             - major
         paths:
             - 'docs/**'
+            - 'lerna.json'
     pull_request:
         branches:
             - master
@@ -15,6 +16,7 @@ on:
             - major
         paths:
             - 'docs/**'
+            - 'lerna.json'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
