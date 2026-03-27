@@ -175,17 +175,24 @@ function createCustomFieldValidationSchema(customField: CustomFieldConfig): ZodT
         case 'localeString':
         case 'localeText':
         case 'string':
-            zodType = createStringValidationSchema(customField.pattern);
+            zodType = createStringValidationSchema((customField as StringCustomFieldConfig).pattern);
             break;
         case 'int':
-            zodType = createNumberValidationSchema(customField.intMin, customField.intMax);
+            zodType = createNumberValidationSchema(
+                (customField as IntCustomFieldConfig).intMin,
+                (customField as IntCustomFieldConfig).intMax,
+            );
             break;
         case 'float':
-            zodType = createNumberValidationSchema(customField.floatMin, customField.floatMax);
+            zodType = createNumberValidationSchema(
+                (customField as FloatCustomFieldConfig).floatMin,
+                (customField as FloatCustomFieldConfig).floatMax,
+            );
             break;
         case 'datetime': {
-            const minDate = parseDate(customField.datetimeMin);
-            const maxDate = parseDate(customField.datetimeMax);
+            const cf = customField as DateTimeCustomFieldConfig;
+            const minDate = parseDate(cf.datetimeMin);
+            const maxDate = parseDate(cf.datetimeMax);
             zodType = createDateValidationSchema(minDate, maxDate);
             break;
         }
