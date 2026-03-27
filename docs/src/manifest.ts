@@ -1,17 +1,21 @@
 import type { DocsPackageManifestInput, FileInfo } from '@vendure-io/docs-provider';
 import { applyLastModifiedDates, createNestedNavigationFromFolder, resolveManifest } from '@vendure-io/docs-provider';
+import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lastModifiedDates } from './dates.generated.js';
 
 const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const repoRoot = dirname(packageRoot);
+const lernaJson = JSON.parse(readFileSync(join(repoRoot, 'lerna.json'), 'utf-8'));
+
 const file = (relativePath: string) => join(packageRoot, relativePath);
 const folder = (relativePath: string) => join(packageRoot, relativePath);
 
 const manifestInput: DocsPackageManifestInput = {
     id: 'core',
     name: 'Vendure Core Documentation',
-    version: '3.5.2',
+    version: lernaJson.version,
     vendureVersion: 'v3',
     basePath: packageRoot,
     navigation: [
