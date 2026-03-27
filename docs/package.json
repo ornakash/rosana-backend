@@ -3,8 +3,6 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "generate-dates": "tsx scripts/generate-dates.ts",
-        "pretest:mdx": "npm run generate-dates",
         "test:mdx": "tsx scripts/test-mdx.ts",
         "test:mdx:verbose": "tsx scripts/test-mdx.ts --verbose",
         "typecheck": "tsc --noEmit"

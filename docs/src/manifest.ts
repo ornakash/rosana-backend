@@ -1,9 +1,8 @@
 import type { DocsPackageManifestInput, FileInfo } from '@vendure-io/docs-provider';
-import { applyLastModifiedDates, createNestedNavigationFromFolder, resolveManifest } from '@vendure-io/docs-provider';
+import { createNestedNavigationFromFolder, resolveManifest } from '@vendure-io/docs-provider';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lastModifiedDates } from './dates.generated.js';
 
 const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const repoRoot = dirname(packageRoot);
@@ -1127,13 +1126,4 @@ const manifestInput: DocsPackageManifestInput = {
     },
 };
 
-const resolvedManifest = resolveManifest(manifestInput);
-
-export const manifest = {
-    ...resolvedManifest,
-    navigation: applyLastModifiedDates(
-        resolvedManifest.navigation,
-        lastModifiedDates,
-        { basePath: 'docs' }
-    ),
-};
+export const manifest = resolveManifest(manifestInput);

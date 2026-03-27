@@ -50,10 +50,6 @@ jobs:
               working-directory: docs
               run: bun install
 
-            - name: Generate dates
-              working-directory: docs
-              run: bun run generate-dates
-
             - name: Generate manifest
               run: bun run docs/scripts/compile-manifest.ts
 
