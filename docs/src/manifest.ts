@@ -1120,7 +1120,7 @@ const manifestInput: DocsPackageManifestInput = {
         },
     ],
     github: {
-        repository: 'vendure-ecommerce/vendure',
+        repository: 'vendurehq/vendure',
         branch: 'master',
         docsPath: 'docs',
     },
