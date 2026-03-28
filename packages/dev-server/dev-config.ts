@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { AdminUiPlugin } from '@vendure/admin-ui-plugin';
-import { AssetServerPlugin } from '@vendure/asset-server-plugin';
+import { AssetServerPlugin, configureS3AssetStorage } from '@vendure/asset-server-plugin';
 import { ADMIN_API_PATH, API_PORT, SHOP_API_PATH } from '@vendure/common/lib/shared-constants';
 import {
     DefaultJobQueuePlugin,
@@ -88,7 +88,19 @@ export const devConfig: VendureConfig = {
         GraphiqlPlugin.init(),
         AssetServerPlugin.init({
             route: 'assets',
-            assetUploadDir: path.join(__dirname, 'assets'),
+            assetUploadDir: path.join(__dirname, 'assets').replace(/\\/g, '/'),
+            storageStrategyFactory: configureS3AssetStorage({
+                bucket: process.env.R2_BUCKET || 'rosana-public-prod',
+                credentials: {
+                    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+                    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+                },
+                nativeS3Configuration: {
+                    endpoint: process.env.R2_ENDPOINT || 'https://8eb797f8c0d34611b3d77e0ffa64f069.r2.cloudflarestorage.com',
+                    region: 'auto',
+                    forcePathStyle: true,
+                },
+            }),
         }),
         DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: false }),
         // Enable if you need to debug the job queue
@@ -190,6 +202,7 @@ function getDbConfig(): DataSourceOptions {
                 password: process.env.DB_PASSWORD || 'password',
                 database: process.env.DB_NAME || 'vendure-dev',
                 schema: process.env.DB_SCHEMA || 'public',
+                ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
             };
         case 'sqlite':
             console.log('Using sqlite connection');
