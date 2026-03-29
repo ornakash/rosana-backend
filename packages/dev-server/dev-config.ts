@@ -30,6 +30,7 @@ const IS_INSTRUMENTED = process.env.IS_INSTRUMENTED === 'true';
 export const devConfig: VendureConfig = {
     apiOptions: {
         port: API_PORT,
+        trustProxy: true,
         adminApiPath: ADMIN_API_PATH,
         adminApiPlayground: {
             settings: {
