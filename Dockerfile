@@ -1,8 +1,8 @@
-FROM node:20-slim
+FROM node:20
 
 WORKDIR /usr/src/app
 
-# Install dependencies
+# Install all dependencies (including devDependencies needed for build)
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -16,5 +16,4 @@ WORKDIR /usr/src/app/packages/dev-server
 
 EXPOSE 3000
 
-# Run server + worker together
 CMD ["node", "-r", "ts-node/register", "-r", "dotenv/config", "-r", "tsconfig-paths/register", "index.ts"]
