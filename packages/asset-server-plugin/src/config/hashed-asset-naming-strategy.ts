@@ -1,6 +1,6 @@
 import { DefaultAssetNamingStrategy, RequestContext } from '@vendure/core';
 import { createHash } from 'crypto';
-import path from 'path';
+import path from 'path/posix';
 
 /**
  * @description

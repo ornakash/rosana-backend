@@ -2,7 +2,6 @@ import { PutObjectRequest, S3ClientConfig } from '@aws-sdk/client-s3';
 import { AwsCredentialIdentity, AwsCredentialIdentityProvider } from '@aws-sdk/types';
 import { AssetStorageStrategy, Logger } from '@vendure/core';
 import { Request } from 'express';
-import * as path from 'node:path';
 import { Readable } from 'node:stream';
 
 import { getAssetUrlPrefixFn } from '../common';
@@ -123,8 +122,11 @@ export function configureS3AssetStorage(s3Config: S3Config) {
             if (!identifier) {
                 return '';
             }
-            const prefix = prefixFn(request, identifier);
-            return identifier.startsWith(prefix) ? identifier : `${prefix}${identifier}`;
+            const normalizedIdentifier = identifier.replace(/\\/g, '/');
+            const prefix = prefixFn(request, normalizedIdentifier);
+            return normalizedIdentifier.startsWith(prefix)
+                ? normalizedIdentifier
+                : `${prefix}${normalizedIdentifier}`;
         };
         return new S3AssetStorageStrategy(s3Config, toAbsoluteUrlFn);
     };
@@ -282,7 +284,7 @@ export class S3AssetStorageStrategy implements AssetStorageStrategy {
     private getObjectParams(identifier: string) {
         return {
             Bucket: this.s3Config.bucket,
-            Key: path.join(identifier.replace(/^\//, '')),
+            Key: identifier.replace(/^\//, '').replace(/\\/g, '/'),
         };
     }
 
