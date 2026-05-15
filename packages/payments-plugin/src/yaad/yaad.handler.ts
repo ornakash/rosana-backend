@@ -38,6 +38,7 @@ export const yaadPaymentHandler = new PaymentMethodHandler({
         },
         successUrl: {
             type: 'string',
+            required: false,
             defaultValue: '',
             label: [{ languageCode: LanguageCode.en, value: 'Success redirect URL' }],
             description: [
@@ -52,6 +53,7 @@ export const yaadPaymentHandler = new PaymentMethodHandler({
         },
         failureUrl: {
             type: 'string',
+            required: false,
             defaultValue: '',
             label: [{ languageCode: LanguageCode.en, value: 'Failure redirect URL' }],
             description: [
