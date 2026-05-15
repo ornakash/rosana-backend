@@ -228,8 +228,8 @@ export class YaadService {
 
         if (template) {
             return template
-                .replaceAll('{orderCode}', encodeURIComponent(orderCode || ''))
-                .replaceAll('{locale}', encodeURIComponent(locale || ''));
+                .replace(/\{orderCode\}/g, encodeURIComponent(orderCode || ''))
+                .replace(/\{locale\}/g, encodeURIComponent(locale || ''));
         }
 
         const storefrontHost = this.options.storefrontHost.replace(/\/$/, '');
