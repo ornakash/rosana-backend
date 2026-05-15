@@ -15,6 +15,7 @@ import {
 import { DashboardPlugin } from '@vendure/dashboard/plugin';
 import { defaultEmailHandlers, EmailPlugin, FileBasedTemplateLoader } from '@vendure/email-plugin';
 import { GraphiqlPlugin } from '@vendure/graphiql-plugin';
+import { YaadPlugin } from '@vendure/payments-plugin/package/yaad';
 import { SentryPlugin } from '@vendure/sentry-plugin';
 import { TelemetryPlugin } from '@vendure/telemetry-plugin';
 import 'dotenv/config';
@@ -86,6 +87,9 @@ export const devConfig: VendureConfig = {
         //     platformFeeSKU: 'FEE',
         // }),
         ReviewsPlugin,
+        YaadPlugin.init({
+            storefrontHost: process.env.STOREFRONT_HOST || 'http://localhost:3001',
+        }),
         GraphiqlPlugin.init(),
         AssetServerPlugin.init({
             route: 'assets',

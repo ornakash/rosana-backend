@@ -85,6 +85,17 @@ export const initialData: InitialData = {
                 arguments: [{ name: 'automaticSettle', value: 'false' }],
             },
         },
+        {
+            name: 'Yaad Sarig',
+            handler: {
+                code: 'yaad-payment-handler',
+                arguments: [
+                    { name: 'key', value: '' },
+                    { name: 'passP', value: '' },
+                    { name: 'masof', value: '' },
+                ],
+            },
+        },
     ],
     collections: [
         {
